@@ -5,15 +5,20 @@ import Pusher from 'pusher-js';
 export default class Map extends Component {
     constructor(props) {
         super(props);
-        -23.6039937,-46.6946932
+
         this.state = {
-            lat: -23.6036299, 
-            lng: -46.6939743
+            currentPosition: {
+                lat: -23.6036299, 
+                lng: -46.6939743,
+            },
+            destination: {
+                lat: -23.6036299, 
+                lng: -46.6939743,
+            },
         }
 
         this.map = null;
-
-        this.initPusher()
+        this.initPusher();
     }
 
     initPusher() {
@@ -41,14 +46,14 @@ export default class Map extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const maps = this.props.google.maps;
-
         if (prevProps.google !== this.props.google) {
-            this.initMap(maps)
+            this.initMap(this.props.google.maps);
         } else {
-            setDestination()
+            const maps = this.props.google.maps
+            
+            this.setDestination(maps);
 
-            var position = new maps.LatLng(this.state.lat, this.state.lng)
+            var position = new maps.LatLng(this.state.currentPosition.lat, this.state.currentPosition.lng)
             this.marker.setPosition(position);
 
             var bounds = new maps.LatLngBounds();
@@ -58,12 +63,14 @@ export default class Map extends Component {
         }
     }
 
-    // setDestination(maps) {
-    //     this.marker = new maps.Marker({
-    //         position: position,
-    //         map: this.map
-    //     });
-    // }
+    setDestination(maps) {
+        var position = new maps.LatLng(this.state.destination.lat, this.state.destination.lng);
+
+        this.destination = new maps.Marker({
+            position: position,
+            map: this.map
+        });
+    }
 
     initMap(maps) {
         const mapRef = this.refs.myMap;
@@ -71,10 +78,10 @@ export default class Map extends Component {
 
         this.map = new maps.Map(node, {
             zoom: 17,
-            center: {lat: this.state.lat, lng: this.state.lng}
+            center: {lat: this.state.currentPosition.lat, lng: this.state.currentPosition.lng}
         });
 
-        var position = new maps.LatLng(this.state.lat, this.state.lng);
+        var position = new maps.LatLng(this.state.currentPosition.lat, this.state.currentPosition.lng);
 
         this.marker = new maps.Marker({
             position: position,
@@ -82,16 +89,11 @@ export default class Map extends Component {
         });
     }
 
-    // componentWiUpdate() {
-    //     var position = new maps.LatLng(this.state.lat, this.state.lng)
-    //     this.marker.setPosition(position);
-    // }
-
     render() {
         const style = {
             width: '100vw',
             height: '100vh'
-          }
+        }
 
         return (
             <div ref='myMap' style={style}></div>
