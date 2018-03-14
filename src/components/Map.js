@@ -15,6 +15,7 @@ export default class Map extends Component {
                 lat: -23.6036299, 
                 lng: -46.6939743,
             },
+            status: "idle"
         }
 
         this.map = null;
@@ -45,7 +46,6 @@ export default class Map extends Component {
         bounds.extend(this.marker.getPosition());
 
         this.map.fitBounds(bounds);
-        //this.map.setZoom(this.map.getZoom()-5);
     }
 
     updateState(data) {
@@ -57,11 +57,17 @@ export default class Map extends Component {
             destination: {
                 lat: data.destination.lat,
                 lng: data.destination.lng
-            }
+            },
+            status: data.status
         });
     }
 
     componentDidUpdate(prevProps, prevState) {
+        if (this.state.status == "arrived") {
+            this.finishOrder();
+            return;
+        }
+
         if (prevProps.google !== this.props.google) {
             this.initMap(this.props.google.maps);
         } else {
@@ -69,11 +75,34 @@ export default class Map extends Component {
         }
     }
 
+    closeOrder() {
+        this.audio.pause();
+    }
+
+    finishOrder() {
+        this.audio = new Audio('srcfile.wav');
+        this.audio.play();
+
+        this.timer = setInterval(this.closeOrder(), 3000);
+    }
+
+    updateOrderPosition(maps) {
+        let position = new maps.LatLng(this.state.currentPosition.lat, this.state.currentPosition.lng);
+        
+        if (!this.marker) {
+            this.marker = new maps.Marker({
+                //icon: require('truck.png'),
+                map: this.map,
+                position: position
+            });
+        } else {
+            this.marker.setPosition(position);
+        }
+    }
+
     updateLocations(maps) {
         this.setDestination(maps);
-
-        var position = new maps.LatLng(this.state.currentPosition.lat, this.state.currentPosition.lng)
-        this.marker.setPosition(position);
+        this.updateOrderPosition(maps);
 
         this.fitMap(maps);
     }
@@ -91,16 +120,11 @@ export default class Map extends Component {
         const mapRef = this.refs.myMap;
         const node = ReactDOM.findDOMNode(mapRef);
 
+        let initialPosition = new maps.LatLng(-23.5928949, -46.7137993);
+
         this.map = new maps.Map(node, {
             zoom: 17,
-            center: {lat: this.state.currentPosition.lat, lng: this.state.currentPosition.lng}
-        });
-
-        var position = new maps.LatLng(this.state.currentPosition.lat, this.state.currentPosition.lng);
-
-        this.marker = new maps.Marker({
-            position: position,
-            map: this.map
+            center: initialPosition
         });
     }
 
