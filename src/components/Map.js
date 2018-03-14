@@ -38,10 +38,26 @@ export default class Map extends Component {
         });
     }
 
+    fitMap(maps) {
+        var bounds = new maps.LatLngBounds();
+        
+        bounds.extend(this.destination.getPosition());
+        bounds.extend(this.marker.getPosition());
+
+        this.map.fitBounds(bounds);
+        //this.map.setZoom(this.map.getZoom()-5);
+    }
+
     updateState(data) {
         this.setState({
-            lat: data.current_location.lat,
-            lng: data.current_location.lng
+            currentPosition: {
+                lat: data.current_location.lat,
+                lng: data.current_location.lng
+            },
+            destination: {
+                lat: data.destination.lat,
+                lng: data.destination.lng
+            }
         });
     }
 
@@ -49,18 +65,17 @@ export default class Map extends Component {
         if (prevProps.google !== this.props.google) {
             this.initMap(this.props.google.maps);
         } else {
-            const maps = this.props.google.maps
-            
-            this.setDestination(maps);
-
-            var position = new maps.LatLng(this.state.currentPosition.lat, this.state.currentPosition.lng)
-            this.marker.setPosition(position);
-
-            var bounds = new maps.LatLngBounds();
-            bounds.extend(this.marker.getPosition());
-            this.map.fitBounds(bounds);
-            this.map.setZoom(this.map.getZoom()-5);
+            this.updateLocations(this.props.google.maps);
         }
+    }
+
+    updateLocations(maps) {
+        this.setDestination(maps);
+
+        var position = new maps.LatLng(this.state.currentPosition.lat, this.state.currentPosition.lng)
+        this.marker.setPosition(position);
+
+        this.fitMap(maps);
     }
 
     setDestination(maps) {
