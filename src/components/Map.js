@@ -33,7 +33,7 @@ export default class Map extends Component {
 
     bindChannel() {
         this.channel = this.pusherClient.subscribe("order-stream"); 
-        this.channel.bind('1991ed20-2862-11e8-b6db-579bdd5713bc', (data) => {
+        this.channel.bind('78e8c5a0-286c-11e8-b6db-579bdd5713bc', (data) => {
             this.updateState(data);
             console.log(data);
         });
