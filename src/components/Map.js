@@ -33,7 +33,7 @@ export default class Map extends Component {
 
     bindChannel() {
         this.channel = this.pusherClient.subscribe("order-stream"); 
-        this.channel.bind('5cc97000-2712-11e8-ba85-c917109fb6e3', (data) => {
+        this.channel.bind('1991ed20-2862-11e8-b6db-579bdd5713bc', (data) => {
             this.updateState(data);
             console.log(data);
         });
@@ -58,14 +58,13 @@ export default class Map extends Component {
                 lat: data.destination.lat,
                 lng: data.destination.lng
             },
-            status: data.status
+            status: data.state
         });
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (this.state.status == "arrived") {
+        if (this.state.status == "delivered") {
             this.finishOrder();
-            return;
         }
 
         if (prevProps.google !== this.props.google) {
@@ -75,15 +74,11 @@ export default class Map extends Component {
         }
     }
 
-    closeOrder() {
-        this.audio.pause();
-    }
-
     finishOrder() {
-        this.audio = new Audio('srcfile.wav');
+        this.audio = new Audio('/gas.mp3');
         this.audio.play();
 
-        this.timer = setInterval(this.closeOrder(), 3000);
+        console.log("finishOrder()");
     }
 
     updateOrderPosition(maps) {
@@ -91,7 +86,7 @@ export default class Map extends Component {
         
         if (!this.marker) {
             this.marker = new maps.Marker({
-                //icon: require('truck.png'),
+                icon: 'https://cdn3.iconfinder.com/data/icons/wpzoom-developer-icon-set/500/130-32.png',
                 map: this.map,
                 position: position
             });
