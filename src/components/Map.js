@@ -39,13 +39,17 @@ export default class Map extends Component {
         });
     }
 
-    fitMap(maps) {
-        var bounds = new maps.LatLngBounds();
+    fitMap(googleMaps) {
+        var bounds = new googleMaps.LatLngBounds();
         
         bounds.extend(this.destination.getPosition());
         bounds.extend(this.marker.getPosition());
 
         this.map.fitBounds(bounds);
+
+        googleMaps.event.addListenerOnce(this.map, "bounds_changed", (event) => { 
+            if (this.getZoom() > 16) this.setZoom(16);
+        });
     }
 
     updateState(data) {
@@ -118,8 +122,12 @@ export default class Map extends Component {
         let initialPosition = new maps.LatLng(-23.5928949, -46.7137993);
 
         this.map = new maps.Map(node, {
-            zoom: 17,
+            zoom: 15,
             center: initialPosition
+        });
+
+        maps.event.addListener(this.map, "idle", function() { 
+            if (this.getZoom() > 16) this.setZoom(16);
         });
     }
 
