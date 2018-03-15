@@ -39,19 +39,6 @@ export default class Map extends Component {
         });
     }
 
-    fitMap(googleMaps) {
-        var bounds = new googleMaps.LatLngBounds();
-        
-        bounds.extend(this.destination.getPosition());
-        bounds.extend(this.marker.getPosition());
-
-        this.map.fitBounds(bounds);
-
-        googleMaps.event.addListenerOnce(this.map, "bounds_changed", (event) => { 
-            if (this.getZoom() > 16) this.setZoom(16);
-        });
-    }
-
     updateState(data) {
         this.setState({
             currentPosition: {
@@ -63,6 +50,19 @@ export default class Map extends Component {
                 lng: data.destination.lng
             },
             status: data.state
+        });
+    }
+
+    fitMap(googleMaps) {
+        var bounds = new googleMaps.LatLngBounds();
+        
+        bounds.extend(this.destination.getPosition());
+        bounds.extend(this.marker.getPosition());
+
+        this.map.fitBounds(bounds);
+
+        googleMaps.event.addListenerOnce(this.map, "bounds_changed", (event) => { 
+            if (this.getZoom() > 16) this.setZoom(16);
         });
     }
 
@@ -78,25 +78,20 @@ export default class Map extends Component {
         }
     }
 
-    finishOrder() {
-        this.audio = new Audio('/gas.mp3');
-        this.audio.play();
+    initMap(maps) {
+        const mapRef = this.refs.myMap;
+        const node = ReactDOM.findDOMNode(mapRef);
 
-        console.log("finishOrder()");
-    }
+        let initialPosition = new maps.LatLng(-23.5928949, -46.7137993);
 
-    updateOrderPosition(maps) {
-        let position = new maps.LatLng(this.state.currentPosition.lat, this.state.currentPosition.lng);
-        
-        if (!this.marker) {
-            this.marker = new maps.Marker({
-                icon: 'https://cdn3.iconfinder.com/data/icons/wpzoom-developer-icon-set/500/130-32.png',
-                map: this.map,
-                position: position
-            });
-        } else {
-            this.marker.setPosition(position);
-        }
+        this.map = new maps.Map(node, {
+            zoom: 15,
+            center: initialPosition
+        });
+
+        maps.event.addListener(this.map, "idle", function() { 
+            if (this.getZoom() > 16) this.setZoom(16);
+        });
     }
 
     updateLocations(maps) {
@@ -115,20 +110,25 @@ export default class Map extends Component {
         });
     }
 
-    initMap(maps) {
-        const mapRef = this.refs.myMap;
-        const node = ReactDOM.findDOMNode(mapRef);
+    updateOrderPosition(maps) {
+        let position = new maps.LatLng(this.state.currentPosition.lat, this.state.currentPosition.lng);
+        
+        if (!this.marker) {
+            this.marker = new maps.Marker({
+                icon: 'https://cdn3.iconfinder.com/data/icons/wpzoom-developer-icon-set/500/130-32.png',
+                map: this.map,
+                position: position
+            });
+        } else {
+            this.marker.setPosition(position);
+        }
+    }
 
-        let initialPosition = new maps.LatLng(-23.5928949, -46.7137993);
+    finishOrder() {
+        this.audio = new Audio('/gas.mp3');
+        this.audio.play();
 
-        this.map = new maps.Map(node, {
-            zoom: 15,
-            center: initialPosition
-        });
-
-        maps.event.addListener(this.map, "idle", function() { 
-            if (this.getZoom() > 16) this.setZoom(16);
-        });
+        console.log("finishOrder()");
     }
 
     render() {
